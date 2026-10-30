@@ -115,6 +115,13 @@ func (s *Server) StartEventListeners() {
 							if e.Data == environment.ProcessStartingState {
 								limit.Reset()
 								s.Throttler().Reset()
+
+								// When the egg defines no startup detection lines there is nothing to
+								// wait for, so skip the starting state and mark the server running as
+								// soon as the container boots.
+								if len(s.ProcessConfiguration().Startup.Done) == 0 {
+									s.Environment.SetState(environment.ProcessRunningState)
+								}
 							}
 							s.OnStateChange()
 						}
